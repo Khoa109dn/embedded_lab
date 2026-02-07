@@ -1,0 +1,2 @@
+../Src/spi.c:3:6:SPI1_Init	4	static
+../Src/spi.c:23:6:SPI1_Write	16	static

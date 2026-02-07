@@ -1,0 +1,119 @@
+#include "stm32f103xb.h"
+
+/* ===== OLED PIN ===== */
+#define CS_LOW()   GPIOA->BRR  = (1<<4)
+#define CS_HIGH()  GPIOA->BSRR = (1<<4)
+#define DC_CMD()   GPIOB->BRR  = (1<<1)
+#define DC_DATA()  GPIOB->BSRR = (1<<1)
+#define RES_LOW()  GPIOB->BRR  = (1<<0)
+#define RES_HIGH() GPIOB->BSRR = (1<<0)
+
+/* ===== DELAY ===== */
+void delay_ms(uint32_t ms)
+{
+    for(uint32_t i=0;i<ms;i++)
+        for(volatile uint32_t j=0;j<8000;j++);
+}
+
+/* ===== SPI WRITE ===== */
+void SPI1_Write(uint8_t data)
+{
+    while(!(SPI1->SR & SPI_SR_TXE));
+    SPI1->DR = data;
+    while(SPI1->SR & SPI_SR_BSY);
+}
+
+/* ===== OLED CMD / DATA ===== */
+void OLED_Cmd(uint8_t cmd)
+{
+    DC_CMD();
+    CS_LOW();
+    SPI1_Write(cmd);
+    CS_HIGH();
+}
+
+void OLED_Data(uint8_t data)
+{
+    DC_DATA();
+    CS_LOW();
+    SPI1_Write(data);
+    CS_HIGH();
+}
+
+/* ===== OLED CURSOR ===== */
+void OLED_SetCursor(uint8_t page, uint8_t col)
+{
+    OLED_Cmd(0xB0 | page);
+    OLED_Cmd(0x00 | (col & 0x0F));
+    OLED_Cmd(0x10 | (col >> 4));
+}
+
+/* ===== OLED INIT ===== */
+void OLED_Init(void)
+{
+    RCC->APB2ENR |= RCC_APB2ENR_IOPAEN | RCC_APB2ENR_IOPBEN | RCC_APB2ENR_SPI1EN;
+
+    /* PA4 CS */
+    GPIOA->CRL &= ~(0xF<<16);
+    GPIOA->CRL |=  (0x3<<16);
+
+    /* PA5 SCK, PA7 MOSI */
+    GPIOA->CRL &= ~((0xF<<20)|(0xF<<28));
+    GPIOA->CRL |=  ((0xB<<20)|(0xB<<28));
+
+    /* PB0 RES, PB1 DC */
+    GPIOB->CRL &= ~((0xF<<0)|(0xF<<4));
+    GPIOB->CRL |=  ((0x3<<0)|(0x3<<4));
+
+    /* SPI1 */
+    SPI1->CR1 =
+        SPI_CR1_MSTR |
+        SPI_CR1_SSM  |
+        SPI_CR1_SSI  |
+        SPI_CR1_BR_1;
+    SPI1->CR1 |= SPI_CR1_SPE;
+
+    /* RESET OLED */
+    RES_LOW();
+    delay_ms(20);
+    RES_HIGH();
+
+    /* SSD1306 INIT SEQ */
+    OLED_Cmd(0xAE);
+    OLED_Cmd(0x20); OLED_Cmd(0x00); // horizontal
+    OLED_Cmd(0xA8); OLED_Cmd(0x3F);
+    OLED_Cmd(0xD3); OLED_Cmd(0x00);
+    OLED_Cmd(0x40);
+    OLED_Cmd(0xA1);
+    OLED_Cmd(0xC8);
+    OLED_Cmd(0xDA); OLED_Cmd(0x12);
+    OLED_Cmd(0x81); OLED_Cmd(0x7F);
+    OLED_Cmd(0xA4);
+    OLED_Cmd(0xA6);
+    OLED_Cmd(0xAF);
+}
+
+/* ===== CLEAR OLED ===== */
+void OLED_Clear(void)
+{
+    for(uint8_t p=0;p<8;p++)
+    {
+        OLED_SetCursor(p,0);
+        for(uint8_t c=0;c<128;c++)
+            OLED_Data(0x00);
+    }
+}
+
+/* ===== MAIN ===== */
+int main(void)
+{
+    OLED_Init();
+    OLED_Clear();
+
+    /* TEST: vẽ 1 thanh ngang */
+    OLED_SetCursor(3,0);
+    for(int i=0;i<128;i++)
+        OLED_Data(0xFF);
+
+    while(1);
+}

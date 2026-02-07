@@ -1,0 +1,8 @@
+../Src/adxl345.c:6:6:delay_us	2
+../Src/adxl345.c:10:16:i2c_wait_for_flag	3
+../Src/adxl345.c:16:13:i2c_clear_addr	1
+../Src/adxl345.c:23:13:I2C1_WriteReg	5
+../Src/adxl345.c:36:13:I2C1_ReadRegs	13
+../Src/adxl345.c:88:6:I2C1_Init	1
+../Src/adxl345.c:102:6:ADXL345_Init_RegLevel	2
+../Src/adxl345.c:119:6:ADXL345_Read_Accel_Raw_RegLevel	1

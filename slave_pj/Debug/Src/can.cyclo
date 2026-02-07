@@ -1,0 +1,3 @@
+../Src/can.c:3:6:CAN_Init	3
+../Src/can.c:31:6:CAN_SendAngle	4
+../Src/can.c:42:9:CAN_ReadAngle	2

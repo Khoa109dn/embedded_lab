@@ -1,0 +1,85 @@
+#include "stm32f103xb.h"
+#include "can.h"
+#include "servo.h"
+#include "ssd1306.h"
+#include "spi.h"
+#include <stdint.h>
+
+// --- 1. CHÈN HÀM CHUYỂN SỐ SANG CHUỖI ---
+void int_to_str(uint8_t num, char *str)
+{
+    if (num == 0) {
+        str[0] = '0';
+        str[1] = '\0';
+        return;
+    }
+    uint8_t i = 0;
+    uint8_t temp = num;
+    while (temp > 0) {
+        temp /= 10;
+        i++;
+    }
+    str[i] = '\0';
+    while (num > 0) {
+        i--;
+        str[i] = (num % 10) + '0';
+        num /= 10;
+    }
+}
+
+// --- 2. CHÈN HÀM CẤU HÌNH CLOCK ---
+void SystemClock_Config(void)
+{
+    RCC->CR |= RCC_CR_HSEON;
+    while (!(RCC->CR & RCC_CR_HSERDY));
+
+    FLASH->ACR |= FLASH_ACR_PRFTBE;
+    FLASH->ACR &= ~FLASH_ACR_LATENCY;
+    FLASH->ACR |= FLASH_ACR_LATENCY_2;
+
+    RCC->CFGR |= RCC_CFGR_PLLSRC;
+    RCC->CFGR |= RCC_CFGR_PLLMULL9;
+
+    RCC->CR |= RCC_CR_PLLON;
+    while (!(RCC->CR & RCC_CR_PLLRDY));
+
+    RCC->CFGR |= RCC_CFGR_SW_PLL;
+    while ((RCC->CFGR & RCC_CFGR_SWS) != RCC_CFGR_SWS_PLL);
+}
+
+// --- 3. HÀM MAIN THỰC THI ---
+int main(void)
+{
+    SystemClock_Config();
+
+    // Khởi tạo các ngoại vi
+    SPI1_Init();
+    SSD1306_Init();
+    Servo_Init();
+    CAN_Init();
+
+    uint8_t received_angle = 0;
+    char buffer[20];
+
+    while (1)
+    {
+        // Kiểm tra nếu có dữ liệu từ CAN Bus
+        if (CAN_ReadAngle(&received_angle))
+        {
+            // Giới hạn góc an toàn cho Servo
+            if (received_angle > 180) received_angle = 180;
+
+            Servo_SetAngle(received_angle);
+
+            // Hiển thị lên màn hình OLED
+            SSD1306_Clear();
+            SSD1306_SetCursor(0, 0);
+            SSD1306_Print("CAN Angle:");
+
+            int_to_str(received_angle, buffer);
+            SSD1306_SetCursor(0, 2); // Xuống dòng xíu cho đẹp
+            SSD1306_Print(buffer);
+            SSD1306_Print(" deg");
+        }
+    }
+}

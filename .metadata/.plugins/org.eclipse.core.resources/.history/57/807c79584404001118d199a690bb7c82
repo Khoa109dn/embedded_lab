@@ -1,0 +1,50 @@
+#include "stm32f103xb.h"
+
+void TIM2_PWM_Init(void) {
+    // 1. Cấp xung Clock
+    RCC->APB2ENR |= RCC_APB2ENR_IOPAEN;  // Bật clock GPIOA
+    RCC->APB1ENR |= RCC_APB1ENR_TIM2EN;  // Bật clock TIM2
+
+    // 2. Cấu hình GPIO PA0 (Alternate Function Push-Pull)
+    // Mode: Output 50MHz (11), CNF: Alt Func Push-Pull (10) => 0xB
+    GPIOA->CRL &= ~(0xF << 0); // Xóa cấu hình cũ của PA0
+    GPIOA->CRL |=  (0xB << 0); // Đặt cấu hình mới
+
+    // 3. Cấu hình Time-Base (Tần số 1kHz)
+    TIM2->PSC = 71;   // Chia tần số: 72MHz / 72 = 1MHz
+    TIM2->ARR = 999;  // Chu kỳ: 1000 nhịp * 1µs = 1ms (1kHz)
+
+    // 4. Cấu hình chế độ PWM cho Channel 1
+    // Reset các bit liên quan đến CH1
+    TIM2->CCMR1 &= ~TIM_CCMR1_OC1M;
+
+    // Set PWM Mode 1 (110) cho OC1M
+    TIM2->CCMR1 |= (6 << 4); // Bit 6:4 là OC1M
+
+    // Bật Preload cho CCR1 (Giúp update Duty cycle mượt mà)
+    TIM2->CCMR1 |= TIM_CCMR1_OC1PE;
+
+    // 5. Thiết lập Duty Cycle ban đầu (ví dụ 50%)
+    TIM2->CCR1 = 500;
+
+    // 6. Kích hoạt Output (Kết nối Timer ra chân Pin)
+    TIM2->CCER |= TIM_CCER_CC1E; // Capture/Compare 1 Output Enable
+
+    // 7. Khởi động Timer
+    // Bật bit ARPE (Auto-reload preload enable) - Khuyên dùng cho PWM
+    TIM2->CR1 |= TIM_CR1_ARPE;
+    // Bật Timer
+    TIM2->CR1 |= TIM_CR1_CEN;
+}
+
+int main(void) {
+    TIM2_PWM_Init();
+
+    while(1) {
+        // Thay đổi độ sáng đèn (Duty Cycle) trong vòng lặp
+        for(int i = 0; i <= 1000; i++) {
+            TIM2->CCR1 = i;
+            for(int j=0; j<1000; j++); // Delay nhỏ
+        }
+    }
+}

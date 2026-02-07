@@ -1,0 +1,56 @@
+#include "ssd1306.h"
+#include "spi.h"
+#include "fonts.h"
+
+#define CS_LOW()   GPIOA->BRR = (1<<4)
+#define CS_HIGH()  GPIOA->BSRR = (1<<4)
+#define DC_CMD()   GPIOB->BRR = (1<<1)
+#define DC_DATA()  GPIOB->BSRR = (1<<1)
+#define RES_LOW()  GPIOB->BRR = (1<<0)
+#define RES_HIGH() GPIOB->BSRR = (1<<0)
+
+static void OLED_Cmd(uint8_t cmd)
+{
+    DC_CMD(); CS_LOW();
+    SPI1_Write(cmd);
+    CS_HIGH();
+}
+
+void SSD1306_Init(void)
+{
+    RCC->APB2ENR |= RCC_APB2ENR_IOPAEN | RCC_APB2ENR_IOPBEN;
+
+    // PA4 CS, PB0 RES, PB1 DC
+    GPIOA->CRL |= (3<<16);
+    GPIOB->CRL |= (3<<0)|(3<<4);
+
+    RES_LOW(); for (volatile int i=0;i<10000;i++);
+    RES_HIGH();
+
+    OLED_Cmd(0xAE);
+    OLED_Cmd(0xAF);
+}
+
+void SSD1306_Clear(void)
+{
+    for (int i=0;i<1024;i++)
+    {
+        DC_DATA(); CS_LOW();
+        SPI1_Write(0x00);
+        CS_HIGH();
+    }
+}
+
+void SSD1306_Print(char *str)
+{
+    while (*str)
+    {
+        for (int i=0;i<5;i++)
+        {
+            DC_DATA(); CS_LOW();
+            SPI1_Write(Font5x7[*str-32][i]);
+            CS_HIGH();
+        }
+        str++;
+    }
+}

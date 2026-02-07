@@ -1,0 +1,84 @@
+#include "ssd1306.h"
+#include "spi.h"
+
+#define CS_LOW()   (GPIOB->BRR  = (1 << 6))
+#define CS_HIGH()  (GPIOB->BSRR = (1 << 6))
+#define DC_CMD()   (GPIOB->BRR  = (1 << 7))
+#define DC_DATA()  (GPIOB->BSRR = (1 << 7))
+#define RST_LOW()  (GPIOB->BRR  = (1 << 8))
+#define RST_HIGH() (GPIOB->BSRR = (1 << 8))
+
+static uint8_t buffer[SSD1306_WIDTH * SSD1306_HEIGHT / 8];
+static uint8_t curX, curY;
+
+static void WriteCmd(uint8_t cmd) {
+    CS_LOW();
+    DC_CMD();
+    SPI1_WriteByte(cmd);
+    CS_HIGH();
+}
+
+static void WriteData(uint8_t data) {
+    CS_LOW();
+    DC_DATA();
+    SPI1_WriteByte(data);
+    CS_HIGH();
+}
+
+void SSD1306_Init(void) {
+    RCC->APB2ENR |= RCC_APB2ENR_IOPBEN;
+
+    GPIOB->CRL |= GPIO_CRL_MODE6 | GPIO_CRL_MODE7;
+    GPIOB->CRH |= GPIO_CRH_MODE8;
+
+    RST_LOW();
+    for (volatile int i = 0; i < 10000; i++);
+    RST_HIGH();
+
+    WriteCmd(0xAE);
+    WriteCmd(0xA8); WriteCmd(0x3F);
+    WriteCmd(0xD3); WriteCmd(0x00);
+    WriteCmd(0x40);
+    WriteCmd(0xA1);
+    WriteCmd(0xC8);
+    WriteCmd(0xDA); WriteCmd(0x12);
+    WriteCmd(0x81); WriteCmd(0x7F);
+    WriteCmd(0xA4);
+    WriteCmd(0xA6);
+    WriteCmd(0xAF);
+
+    SSD1306_Clear();
+    SSD1306_Update();
+}
+
+void SSD1306_Clear(void) {
+    for (int i = 0; i < sizeof(buffer); i++)
+        buffer[i] = 0;
+}
+
+void SSD1306_Update(void) {
+    for (uint8_t page = 0; page < 8; page++) {
+        WriteCmd(0xB0 + page);
+        WriteCmd(0x00);
+        WriteCmd(0x10);
+        for (uint8_t x = 0; x < 128; x++)
+            WriteData(buffer[x + page * 128]);
+    }
+}
+
+void SSD1306_GotoXY(uint8_t x, uint8_t y) {
+    curX = x;
+    curY = y;
+}
+
+void SSD1306_Puts(char *str, FontDef_t *font, SSD1306_COLOR color) {
+    while (*str) {
+        uint16_t ch = *str - 32;
+        for (uint8_t i = 0; i < font->FontWidth; i++) {
+            buffer[curX + (curY / 8) * 128] =
+                font->data[ch * font->FontWidth + i];
+            curX++;
+        }
+        str++;
+    }
+}

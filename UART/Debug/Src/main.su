@@ -1,0 +1,6 @@
+../Src/main.c:19:6:uart1_init	4	static
+../Src/main.c:40:6:uart1_write	16	static
+../Src/main.c:46:6:uart1_read	4	static
+../Src/main.c:52:6:uart1_write_string	16	static
+../Src/main.c:58:6:uart1_read_string	24	static
+../Src/main.c:74:5:main	32	static

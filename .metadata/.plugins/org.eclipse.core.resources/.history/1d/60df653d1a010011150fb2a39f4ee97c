@@ -1,0 +1,24 @@
+#include "servo.h"
+
+void Servo_Init(void)
+{
+    RCC->APB2ENR |= RCC_APB2ENR_IOPAEN | RCC_APB2ENR_TIM1EN;
+
+    // PA8 AF Push-Pull
+    GPIOA->CRH &= ~(0xF << 0);
+    GPIOA->CRH |=  (0xB << 0);
+
+    TIM1->PSC = 71;        // 72MHz / (71+1) = 1MHz
+    TIM1->ARR = 19999;     // 20ms
+
+    TIM1->CCMR1 |= (6 << 4);   // PWM mode 1
+    TIM1->CCER  |= TIM_CCER_CC1E;
+    TIM1->BDTR  |= TIM_BDTR_MOE;
+    TIM1->CR1   |= TIM_CR1_CEN;
+}
+
+void Servo_SetAngle(uint8_t angle)
+{
+    if (angle > 180) angle = 180;
+    TIM1->CCR1 = 500 + (angle * 2000) / 180;
+}

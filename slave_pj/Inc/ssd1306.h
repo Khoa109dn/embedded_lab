@@ -1,0 +1,12 @@
+#ifndef SSD1306_H
+#define SSD1306_H
+
+#include "stm32f103xb.h"
+#include <stdint.h>
+
+void SSD1306_Init(void);
+void SSD1306_Clear(void);
+void SSD1306_SetCursor(uint8_t x, uint8_t y);
+void SSD1306_Print(char *str);
+
+#endif

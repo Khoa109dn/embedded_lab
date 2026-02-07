@@ -1,0 +1,6 @@
+// fonts.c
+#include "fonts.h"
+const uint8_t Font5x7[][5] = {
+ {0,0,0,0,0},
+ {0x00,0x00,0x5F,0x00,0x00},
+};

@@ -1,0 +1,2 @@
+../Src/uart.c:3:6:UART1_Init	4	static
+../Src/uart.c:14:9:UART1_Receive	4	static

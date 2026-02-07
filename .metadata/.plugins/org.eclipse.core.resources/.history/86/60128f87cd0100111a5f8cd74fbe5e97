@@ -1,0 +1,47 @@
+#include "stm32f103xb.h"
+#include "spi.h"
+#include "servo.h"
+#include "ssd1306.h"
+
+/* ===== CLOCK 72MHz – BẮT BUỘC ===== */
+void SystemClock_Init(void)
+{
+    RCC->CR |= RCC_CR_HSEON;
+    while (!(RCC->CR & RCC_CR_HSERDY));
+
+    FLASH->ACR |= FLASH_ACR_PRFTBE;
+    FLASH->ACR &= ~FLASH_ACR_LATENCY;
+    FLASH->ACR |= FLASH_ACR_LATENCY_2;
+
+    RCC->CFGR |= RCC_CFGR_PLLSRC;
+    RCC->CFGR |= RCC_CFGR_PLLMULL9;
+
+    RCC->CR |= RCC_CR_PLLON;
+    while (!(RCC->CR & RCC_CR_PLLRDY));
+
+    RCC->CFGR |= RCC_CFGR_SW_PLL;
+    while ((RCC->CFGR & RCC_CFGR_SWS) != RCC_CFGR_SWS_PLL);
+}
+
+int main(void)
+{
+    SystemClock_Init();     // <<< CỐT LÕI
+    SPI1_Init();
+    SSD1306_Init();
+    SSD1306_Clear();
+    Servo_Init();
+
+    uint8_t angle = 0;
+
+    while (1)
+    {
+        SSD1306_Clear();
+        SSD1306_Print("ANGLE");
+
+        Servo_SetAngle(angle);
+        angle += 10;
+        if (angle > 180) angle = 0;
+
+        for (volatile int i = 0; i < 3000000; i++);
+    }
+}

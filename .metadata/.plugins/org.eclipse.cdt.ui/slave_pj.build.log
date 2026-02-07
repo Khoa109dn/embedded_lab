@@ -1,0 +1,10 @@
+14:12:22 **** Incremental Build of configuration Debug for project slave_pj ****
+make -j8 all 
+arm-none-eabi-size  slave_pj.elf 
+   text	   data	    bss	    dec	    hex	filename
+   2816	      0	   1568	   4384	   1120	slave_pj.elf
+Finished building: default.size.stdout
+ 
+
+14:12:22 Build Finished. 0 errors, 0 warnings. (took 536ms)
+

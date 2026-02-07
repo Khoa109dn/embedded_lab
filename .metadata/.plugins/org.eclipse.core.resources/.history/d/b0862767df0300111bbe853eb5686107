@@ -1,0 +1,39 @@
+#include "stm32f103xb.h"
+#include "can.h"
+#include "uart.h"
+
+// 1. CHÈN LẠI HÀM NÀY VÀO MAIN.C ĐỂ HẾT LỖI UNDEFINED
+void SystemClock_Config(void)
+{
+    RCC->CR |= RCC_CR_HSEON;
+    while (!(RCC->CR & RCC_CR_HSERDY));
+
+    FLASH->ACR |= FLASH_ACR_PRFTBE;
+    FLASH->ACR &= ~FLASH_ACR_LATENCY;
+    FLASH->ACR |= FLASH_ACR_LATENCY_2;
+
+    RCC->CFGR |= RCC_CFGR_PLLSRC;
+    RCC->CFGR |= RCC_CFGR_PLLMULL9;
+
+    RCC->CR |= RCC_CR_PLLON;
+    while (!(RCC->CR & RCC_CR_PLLRDY));
+
+    RCC->CFGR |= RCC_CFGR_SW_PLL;
+    while ((RCC->CFGR & RCC_CFGR_SWS) != RCC_CFGR_SWS_PLL);
+}
+
+int main(void)
+{
+    SystemClock_Config();
+    UART1_Init(); // Hàm này giờ sẽ lấy từ uart.c
+    CAN_Init();
+
+    while (1)
+    {
+        if (USART1->SR & USART_SR_RXNE)
+        {
+            uint8_t data = (uint8_t)USART1->DR;
+            CAN_SendAngle(data);
+        }
+    }
+}

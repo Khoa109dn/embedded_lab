@@ -1,0 +1,8 @@
+../Src/adxl345.c:6:6:delay_us	24	static
+../Src/adxl345.c:10:16:i2c_wait_for_flag	24	static
+../Src/adxl345.c:16:13:i2c_clear_addr	16	static
+../Src/adxl345.c:23:13:I2C1_WriteReg	16	static
+../Src/adxl345.c:36:13:I2C1_ReadRegs	24	static
+../Src/adxl345.c:88:6:I2C1_Init	4	static
+../Src/adxl345.c:102:6:ADXL345_Init_RegLevel	16	static
+../Src/adxl345.c:119:6:ADXL345_Read_Accel_Raw_RegLevel	32	static

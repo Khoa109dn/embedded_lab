@@ -1,0 +1,78 @@
+#include "oled.h"
+#include "spi.h"
+
+/* PB6 CS, PB7 DC, PB8 RST */
+#define CS_LOW()   (GPIOB->BRR  = GPIO_BRR_BR6)
+#define CS_HIGH()  (GPIOB->BSRR = GPIO_BSRR_BS6)
+#define DC_CMD()   (GPIOB->BRR  = GPIO_BRR_BR7)
+#define DC_DATA()  (GPIOB->BSRR = GPIO_BSRR_BS7)
+#define RST_LOW()  (GPIOB->BRR  = GPIO_BRR_BR8)
+#define RST_HIGH() (GPIOB->BSRR = GPIO_BSRR_BS8)
+
+static void OLED_GPIO_Init(void)
+{
+    RCC->APB2ENR |= RCC_APB2ENR_IOPBEN;
+
+    GPIOB->CRL &= ~((0xF << 24) | (0xF << 28));
+    GPIOB->CRL |=  ((0x3 << 24) | (0x3 << 28));
+
+    GPIOB->CRH &= ~(0xF << 0);
+    GPIOB->CRH |=  (0x3 << 0);
+}
+
+static void OLED_WriteCmd(uint8_t cmd)
+{
+    CS_LOW(); DC_CMD();
+    SPI1_Write(cmd);
+    CS_HIGH();
+}
+
+static void OLED_WriteData(uint8_t data)
+{
+    CS_LOW(); DC_DATA();
+    SPI1_Write(data);
+    CS_HIGH();
+}
+
+void OLED_Init(void)
+{
+    OLED_GPIO_Init();
+
+    RST_LOW();
+    for (volatile int i = 0; i < 50000; i++);
+    RST_HIGH();
+
+    OLED_WriteCmd(0xAE);
+    OLED_WriteCmd(0xA8); OLED_WriteCmd(0x3F);
+    OLED_WriteCmd(0xD3); OLED_WriteCmd(0x00);
+    OLED_WriteCmd(0x40);
+    OLED_WriteCmd(0xA1);
+    OLED_WriteCmd(0xC8);
+    OLED_WriteCmd(0x81); OLED_WriteCmd(0x7F);
+    OLED_WriteCmd(0xA6);
+    OLED_WriteCmd(0xAF);
+}
+
+void OLED_Clear(void)
+{
+    for (uint8_t p = 0; p < 8; p++)
+    {
+        OLED_WriteCmd(0xB0 + p);
+        OLED_WriteCmd(0x00);
+        OLED_WriteCmd(0x10);
+
+        for (uint8_t i = 0; i < 128; i++)
+            OLED_WriteData(0x00);
+    }
+}
+
+void OLED_ShowAngle(uint8_t angle)
+{
+    OLED_WriteCmd(0xB0);
+    OLED_WriteCmd(0x00);
+    OLED_WriteCmd(0x10);
+
+    OLED_WriteData('0' + angle / 100);
+    OLED_WriteData('0' + (angle / 10) % 10);
+    OLED_WriteData('0' + angle % 10);
+}

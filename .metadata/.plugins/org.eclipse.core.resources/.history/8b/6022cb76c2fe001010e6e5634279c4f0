@@ -1,0 +1,28 @@
+#include "servo.h"
+#include "spi.h"
+#include "oled.h"
+#include "can.h"
+
+int main(void)
+{
+    uint8_t angle = 90;
+
+    Servo_Init();
+    SPI1_Init();
+    OLED_Init();
+    OLED_Clear();
+    CAN_Init();
+
+    Servo_SetAngle(angle);
+    OLED_ShowAngle(angle);
+
+    while (1)
+    {
+        if (CAN_ReceiveAngle(&angle))
+        {
+            Servo_SetAngle(angle);
+            OLED_Clear();
+            OLED_ShowAngle(angle);
+        }
+    }
+}

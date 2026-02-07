@@ -1,0 +1,99 @@
+#include "ssd1306.h"
+#include "spi.h"
+#include "fonts.h"
+
+/* ===== PIN MAP =====
+   CS  -> PA4
+   RES -> PB0
+   DC  -> PB1
+*/
+
+#define CS_LOW()    GPIOA->BRR  = (1 << 4)
+#define CS_HIGH()   GPIOA->BSRR = (1 << 4)
+
+#define RES_LOW()   GPIOB->BRR  = (1 << 0)
+#define RES_HIGH()  GPIOB->BSRR = (1 << 0)
+
+#define DC_CMD()    GPIOB->BRR  = (1 << 1)
+#define DC_DATA()   GPIOB->BSRR = (1 << 1)
+
+/* ===== SEND COMMAND ===== */
+static void OLED_Cmd(uint8_t cmd)
+{
+    DC_CMD();
+    CS_LOW();
+    SPI1_Write(cmd);
+    CS_HIGH();
+}
+
+/* ===== INIT ===== */
+void SSD1306_Init(void)
+{
+    RCC->APB2ENR |= RCC_APB2ENR_IOPAEN | RCC_APB2ENR_IOPBEN;
+
+    /* PA4 CS -> Output PushPull 50MHz */
+    GPIOA->CRL &= ~(0xF << 16);
+    GPIOA->CRL |=  (0x3 << 16);
+
+    /* PB0 RES, PB1 DC -> Output PushPull 50MHz */
+    GPIOB->CRL &= ~((0xF << 0) | (0xF << 4));
+    GPIOB->CRL |=  ((0x3 << 0) | (0x3 << 4));
+
+    /* ===== RESET OLED (CỰC KỲ QUAN TRỌNG) ===== */
+    RES_LOW();
+    for (volatile int i = 0; i < 200000; i++);   // ~10–20ms
+    RES_HIGH();
+    for (volatile int i = 0; i < 800000; i++);   // ~50–100ms
+
+    /* ===== INIT SEQUENCE ===== */
+    OLED_Cmd(0xAE);   // display OFF
+    OLED_Cmd(0x20);   // memory addressing
+    OLED_Cmd(0x10);
+    OLED_Cmd(0xB0);
+    OLED_Cmd(0xC8);
+    OLED_Cmd(0x00);
+    OLED_Cmd(0x10);
+    OLED_Cmd(0x40);
+    OLED_Cmd(0x81);
+    OLED_Cmd(0x7F);
+    OLED_Cmd(0xA1);
+    OLED_Cmd(0xA6);
+    OLED_Cmd(0xA8);
+    OLED_Cmd(0x3F);
+    OLED_Cmd(0xAF);   // display ON
+}
+
+/* ===== CLEAR ===== */
+void SSD1306_Clear(void)
+{
+    for (int page = 0; page < 8; page++)
+    {
+        OLED_Cmd(0xB0 + page);
+        OLED_Cmd(0x00);
+        OLED_Cmd(0x10);
+
+        for (int col = 0; col < 128; col++)
+        {
+            DC_DATA();
+            CS_LOW();
+            SPI1_Write(0x00);
+            CS_HIGH();
+        }
+    }
+}
+
+/* ===== PRINT TEXT ===== */
+void SSD1306_Print(char *str)
+{
+    while (*str)
+    {
+        for (int i = 0; i < 5; i++)
+        {
+            DC_DATA();
+            CS_LOW();
+            SPI1_Write(Font5x7[*str - 32][i]);
+            CS_HIGH();
+        }
+        str++;
+    }
+}

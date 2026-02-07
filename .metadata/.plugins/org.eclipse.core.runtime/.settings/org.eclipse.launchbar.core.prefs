@@ -1,0 +1,11 @@
+LaunchTargetManager/org.eclipse.launchbar.core.launchTargetType.local,Local/arch=x86_64
+LaunchTargetManager/org.eclipse.launchbar.core.launchTargetType.local,Local/name=Local
+LaunchTargetManager/org.eclipse.launchbar.core.launchTargetType.local,Local/os=win32
+configDescList=org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:i2c Debug,org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:spi_master Debug,org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:spi_slave Debug,org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:timer Debug,org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:test_oled Debug,org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:can_bus Debug,org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:master_pj Debug,org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:slave_pj Debug
+eclipse.preferences.version=1
+org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:can_bus\ Debug/activeLaunchMode=run
+org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:can_bus\ Debug/activeLaunchTarget=null\:---
+org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:i2c\ Debug/activeLaunchMode=run
+org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:i2c\ Debug/activeLaunchTarget=null\:---
+org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:spi_master\ Debug/activeLaunchMode=run
+org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:spi_master\ Debug/activeLaunchTarget=null\:---

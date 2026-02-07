@@ -1,0 +1,31 @@
+17:12:27 **** Build of configuration Debug for project test ****
+make -j8 all 
+arm-none-eabi-gcc -mcpu=cortex-m3 -g3 -DDEBUG -c -x assembler-with-cpp -MMD -MP -MF"Startup/startup_stm32f103c8tx.d" -MT"Startup/startup_stm32f103c8tx.o" --specs=nano.specs -mfloat-abi=soft -mthumb -o "Startup/startup_stm32f103c8tx.o" "../Startup/startup_stm32f103c8tx.s"
+arm-none-eabi-gcc "../Src/main.c" -mcpu=cortex-m3 -std=gnu11 -g3 -DDEBUG -DSTM32 -DSTM32F1 -DSTM32F103C8Tx -c -I../Inc -I"F:/stm32cubef1.zip/STM32Cube_FW_F1_V1.8.0/Drivers/CMSIS/Include" -I"F:/stm32cubef1.zip/STM32Cube_FW_F1_V1.8.0/Drivers/CMSIS/Device/ST/STM32F1xx/Include" -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Src/main.d" -MT"Src/main.o" --specs=nano.specs -mfloat-abi=soft -mthumb -o "Src/main.o"
+arm-none-eabi-gcc "../Src/spi.c" -mcpu=cortex-m3 -std=gnu11 -g3 -DDEBUG -DSTM32 -DSTM32F1 -DSTM32F103C8Tx -c -I../Inc -I"F:/stm32cubef1.zip/STM32Cube_FW_F1_V1.8.0/Drivers/CMSIS/Include" -I"F:/stm32cubef1.zip/STM32Cube_FW_F1_V1.8.0/Drivers/CMSIS/Device/ST/STM32F1xx/Include" -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Src/spi.d" -MT"Src/spi.o" --specs=nano.specs -mfloat-abi=soft -mthumb -o "Src/spi.o"
+arm-none-eabi-gcc "../Src/syscalls.c" -mcpu=cortex-m3 -std=gnu11 -g3 -DDEBUG -DSTM32 -DSTM32F1 -DSTM32F103C8Tx -c -I../Inc -I"F:/stm32cubef1.zip/STM32Cube_FW_F1_V1.8.0/Drivers/CMSIS/Include" -I"F:/stm32cubef1.zip/STM32Cube_FW_F1_V1.8.0/Drivers/CMSIS/Device/ST/STM32F1xx/Include" -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Src/syscalls.d" -MT"Src/syscalls.o" --specs=nano.specs -mfloat-abi=soft -mthumb -o "Src/syscalls.o"
+arm-none-eabi-gcc "../Src/sysmem.c" -mcpu=cortex-m3 -std=gnu11 -g3 -DDEBUG -DSTM32 -DSTM32F1 -DSTM32F103C8Tx -c -I../Inc -I"F:/stm32cubef1.zip/STM32Cube_FW_F1_V1.8.0/Drivers/CMSIS/Include" -I"F:/stm32cubef1.zip/STM32Cube_FW_F1_V1.8.0/Drivers/CMSIS/Device/ST/STM32F1xx/Include" -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Src/sysmem.d" -MT"Src/sysmem.o" --specs=nano.specs -mfloat-abi=soft -mthumb -o "Src/sysmem.o"
+arm-none-eabi-gcc "../Src/uart1.c" -mcpu=cortex-m3 -std=gnu11 -g3 -DDEBUG -DSTM32 -DSTM32F1 -DSTM32F103C8Tx -c -I../Inc -I"F:/stm32cubef1.zip/STM32Cube_FW_F1_V1.8.0/Drivers/CMSIS/Include" -I"F:/stm32cubef1.zip/STM32Cube_FW_F1_V1.8.0/Drivers/CMSIS/Device/ST/STM32F1xx/Include" -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Src/uart1.d" -MT"Src/uart1.o" --specs=nano.specs -mfloat-abi=soft -mthumb -o "Src/uart1.o"
+../Src/spi.c: In function 'SPI_Slave_Init':
+../Src/spi.c:11:5: error: 'RCC' undeclared (first use in this function)
+   11 |     RCC->APB2ENR |= (1U << 2);    // bật clock GPIOA
+      |     ^~~
+../Src/spi.c:11:5: note: each undeclared identifier is reported only once for each function it appears in
+../Src/spi.c:26:5: error: 'GPIOA' undeclared (first use in this function)
+   26 |     GPIOA->CRL &= ~((0xFU << 16) |   // PA4
+      |     ^~~~~
+../Src/spi.c:80:5: error: 'SPI1' undeclared (first use in this function)
+   80 |     SPI1->CR1 = 0;
+      |     ^~~~
+In file included from ../Src/uart1.c:1:
+../Inc/uart1.h:4:10: fatal error: stm32f103xb.h: No such file or directory
+    4 | #include "stm32f103xb.h"
+      |          ^~~~~~~~~~~~~~~
+compilation terminated.
+make: *** [Src/subdir.mk:31: Src/spi.o] Error 1
+make: *** Waiting for unfinished jobs....
+make: *** [Src/subdir.mk:31: Src/uart1.o] Error 1
+"make -j8 all" terminated with exit code 2. Build might be incomplete.
+
+17:12:29 Build Failed. 7 errors, 0 warnings. (took 1s.122ms)
+

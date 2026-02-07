@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">&#x0A;<refactoring comment="Rename resource &apos;i2c/Inc/adxl.h&apos; to &apos;adxl345.h&apos;" description="Rename resource &apos;adxl.h&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="Inc/adxl.h" name="adxl345.h" stamp="1764949301210" updateReferences="true"/>&#x0A;<refactoring comment="Rename resource &apos;i2c/Src/adxl.c&apos; to &apos;adxl345.c&apos;" description="Rename resource &apos;adxl.c&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="Src/adxl.c" name="adxl345.c" stamp="1764949322387" updateReferences="true"/>
+</session>

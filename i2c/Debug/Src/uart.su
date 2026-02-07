@@ -1,0 +1,4 @@
+../Src/uart.c:5:6:UART1_Init	16	static
+../Src/uart.c:27:6:UART1_Transmit_Char	16	static
+../Src/uart.c:33:6:UART1_Transmit_String	16	static
+../Src/uart.c:39:6:UART1_Transmit_Number	32	static

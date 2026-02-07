@@ -1,0 +1,6 @@
+../Src/main.c:19:6:uart1_init	1
+../Src/main.c:40:6:uart1_write	2
+../Src/main.c:46:6:uart1_read	2
+../Src/main.c:52:6:uart1_write_string	2
+../Src/main.c:58:6:uart1_read_string	4
+../Src/main.c:74:5:main	2

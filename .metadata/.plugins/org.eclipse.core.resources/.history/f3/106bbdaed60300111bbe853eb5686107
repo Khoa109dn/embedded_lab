@@ -1,0 +1,33 @@
+#include "stm32f103xb.h"
+#include "can.h"
+#include "servo.h"
+#include "ssd1306.h"
+
+int main(void) {
+    SystemClock_Config();
+    Servo_Init();
+    SPI1_Init();
+    SSD1306_Init();
+    CAN_Init();
+
+    uint8_t angle = 0;
+    char buffer[16];
+
+    while (1) {
+        if (CAN_ReadAngle(&angle)) {
+            // Khống chế góc quay an toàn
+            if (angle > 180) angle = 180;
+
+            Servo_SetAngle(angle);
+
+            // Cập nhật màn hình
+            SSD1306_Clear();
+            SSD1306_SetCursor(0, 0);
+            SSD1306_Print("CAN Angle:");
+            SSD1306_SetCursor(0, 2);
+            int_to_str(angle, buffer);
+            SSD1306_Print(buffer);
+            SSD1306_Print(" deg");
+        }
+    }
+}

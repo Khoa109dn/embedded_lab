@@ -1,0 +1,118 @@
+#include "stm32f103xb.h"
+
+/* ===== PIN MACRO ===== */
+#define CS_LOW()   (GPIOA->BSRR = (1<<(4+16)))
+#define CS_HIGH()  (GPIOA->BSRR = (1<<4))
+
+#define DC_LOW()   (GPIOA->BSRR = (1<<(3+16)))
+#define DC_HIGH()  (GPIOA->BSRR = (1<<3))
+
+#define RES_LOW()  (GPIOA->BSRR = (1<<(2+16)))
+#define RES_HIGH() (GPIOA->BSRR = (1<<2))
+
+/* ===== DELAY ===== */
+void delay(volatile uint32_t t) {
+    while(t--);
+}
+
+/* ===== SPI SEND ===== */
+void spi_send(uint8_t data) {
+    while (!(SPI1->SR & SPI_SR_TXE));
+    *((volatile uint8_t *)&SPI1->DR) = data;
+    while (SPI1->SR & SPI_SR_BSY);
+}
+
+/* ===== OLED SEND ===== */
+void oled_cmd(uint8_t cmd) {
+    DC_LOW();
+    CS_LOW();
+    spi_send(cmd);
+    CS_HIGH();
+}
+
+void oled_data(uint8_t data) {
+    DC_HIGH();
+    CS_LOW();
+    spi_send(data);
+    CS_HIGH();
+}
+
+/* ===== OLED INIT ===== */
+void oled_init(void) {
+
+    RES_LOW();
+    delay(50000);
+    RES_HIGH();
+
+    oled_cmd(0xAE);
+    oled_cmd(0x20); oled_cmd(0x00);
+    oled_cmd(0xB0);
+    oled_cmd(0xC8);
+    oled_cmd(0x00);
+    oled_cmd(0x10);
+    oled_cmd(0x40);
+    oled_cmd(0x81); oled_cmd(0x7F);
+    oled_cmd(0xA1);
+    oled_cmd(0xA6);
+    oled_cmd(0xA8); oled_cmd(0x3F);
+    oled_cmd(0xA4);
+    oled_cmd(0xD3); oled_cmd(0x00);
+    oled_cmd(0xD5); oled_cmd(0x80);
+    oled_cmd(0xD9); oled_cmd(0xF1);
+    oled_cmd(0xDA); oled_cmd(0x12);
+    oled_cmd(0xDB); oled_cmd(0x40);
+    oled_cmd(0x8D); oled_cmd(0x14);
+    oled_cmd(0xAF);
+}
+
+/* ===== MAIN ===== */
+int main(void) {
+
+    /* Enable clock */
+    RCC->APB2ENR |= RCC_APB2ENR_IOPAEN |
+                    RCC_APB2ENR_SPI1EN |
+                    RCC_APB2ENR_AFIOEN;
+
+    /* GPIO config */
+    GPIOA->CRL = 0;
+
+    /* PA5  AF PP (SCK)  */
+    GPIOA->CRL |= (0xB << (5 * 4));
+
+    /* PA7  AF PP (MOSI) */
+    GPIOA->CRL |= (0xB << (7 * 4));
+
+    /* PA4, PA3, PA2 Output PP */
+    GPIOA->CRL |= (0x3 << (4 * 4));
+    GPIOA->CRL |= (0x3 << (3 * 4));
+    GPIOA->CRL |= (0x3 << (2 * 4));
+
+    CS_HIGH();
+    DC_HIGH();
+    RES_HIGH();
+
+    /* SPI1 config */
+    SPI1->CR1 =
+        SPI_CR1_MSTR |
+        SPI_CR1_SSM |
+        SPI_CR1_SSI |
+        SPI_CR1_BR_1;   // fPCLK /16
+
+    SPI1->CR1 |= SPI_CR1_SPE;
+
+    /* OLED */
+    oled_init();
+
+    /* Fill screen */
+    for (int page = 0; page < 8; page++) {
+        oled_cmd(0xB0 + page);
+        oled_cmd(0x00);
+        oled_cmd(0x10);
+        for (int i = 0; i < 128; i++) {
+            oled_data(0xFF);
+        }
+    }
+
+    while (1) {
+    }
+}
